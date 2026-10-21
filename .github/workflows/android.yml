@@ -25,19 +25,25 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: false
+          packages: ''
 
-      - name: Install Android platform
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Accept licenses and install Android
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Create offline Android app from the book page
+      - name: Create Android app
         shell: bash
         run: |
-          mkdir -p app/src/main/assets app/src/main/java/com/osmanjana/citizensudani
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/osmanjana/citizensudani
           cp index.html app/src/main/assets/index.html
 
           cat > settings.gradle <<'GRADLE'
@@ -66,8 +72,8 @@ jobs:
           GRADLE
 
           cat > gradle.properties <<'GRADLE'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
           android.useAndroidX=true
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
           GRADLE
 
           cat > app/build.gradle <<'GRADLE'
@@ -119,33 +125,21 @@ jobs:
           import android.app.Activity;
           import android.os.Bundle;
           import android.graphics.Color;
-          import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
 
           public class MainActivity extends Activity {
-              private WebView webView;
-
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   getWindow().setStatusBarColor(Color.rgb(23, 107, 69));
-                  webView = new WebView(this);
-                  setContentView(webView);
-                  WebSettings settings = webView.getSettings();
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-                  webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl("file:///android_asset/index.html");
-              }
 
-              @Override
-              public void onBackPressed() {
-                  if (webView != null && webView.canGoBack()) {
-                      webView.goBack();
-                  } else {
-                      super.onBackPressed();
-                  }
+                  WebView webView = new WebView(this);
+                  setContentView(webView);
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.getSettings().setJavaScriptEnabled(true);
+                  webView.getSettings().setDomStorageEnabled(true);
+                  webView.loadUrl("file:///android_asset/index.html");
               }
           }
           JAVA

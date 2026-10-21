@@ -28,10 +28,15 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK
+      - name: Install Android SDK and accept licenses
+        shell: bash
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
+          set -e
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager --install \
+            "platforms;android-35" \
+            "build-tools;35.0.0" \
+            "platform-tools"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -41,6 +46,7 @@ jobs:
       - name: Create Android app
         shell: bash
         run: |
+          set -e
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/osmanjana/citizensudani
 
@@ -57,25 +63,38 @@ jobs:
             <style>
               * { box-sizing: border-box; }
               body {
-                margin: 0; min-height: 100vh; padding: 22px;
-                display: flex; align-items: center; justify-content: center;
-                text-align: center; font-family: sans-serif;
+                margin: 0;
+                min-height: 100vh;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                font-family: sans-serif;
                 color: white;
                 background: linear-gradient(160deg,#102e24,#176b45,#071b15);
               }
               main { width: 100%; max-width: 440px; }
               img {
-                display: block; width: 100%; max-height: 65vh;
-                object-fit: contain; border-radius: 14px;
-                margin: 0 auto 20px;
+                display: block;
+                width: 100%;
+                max-height: 65vh;
+                object-fit: contain;
+                border-radius: 14px;
+                margin: 0 auto 18px;
               }
-              h1 { font-size: 25px; margin: 12px 0; }
-              p { font-size: 16px; line-height: 1.8; }
+              h1 { font-size: 26px; margin: 12px 0; }
+              p { font-size: 17px; line-height: 1.8; }
               button {
-                width: 100%; padding: 16px; margin-top: 12px;
-                border: 0; border-radius: 12px;
-                background: #f2d16b; color: #173b2b;
-                font-size: 20px; font-weight: bold;
+                width: 100%;
+                padding: 16px;
+                margin-top: 12px;
+                border: 0;
+                border-radius: 12px;
+                background: #f2d16b;
+                color: #173b2b;
+                font-size: 20px;
+                font-weight: bold;
               }
             </style>
           </head>

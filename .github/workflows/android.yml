@@ -1,3 +1,4 @@
+
 name: Build Android APK
 
 on:
@@ -5,6 +6,7 @@ on:
     paths:
       - '.github/workflows/android.yml'
       - 'index.html'
+      - 'غلاف المواطن السوداني_ وجع وأمل.png'
   workflow_dispatch:
 
 permissions:
@@ -25,11 +27,8 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          accept-android-sdk-licenses: false
-          packages: ''
 
-      - name: Accept licenses and install Android
+      - name: Install Android SDK
         run: |
           yes | sdkmanager --licenses || true
           sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
@@ -44,7 +43,52 @@ jobs:
         run: |
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/osmanjana/citizensudani
+
           cp index.html app/src/main/assets/index.html
+          cp 'غلاف المواطن السوداني_ وجع وأمل.png' app/src/main/assets/cover.png
+
+          cat > app/src/main/assets/cover.html <<'HTML'
+          <!doctype html>
+          <html lang="ar" dir="rtl">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>المواطن السوداني - وجع وأمل</title>
+            <style>
+              * { box-sizing: border-box; }
+              body {
+                margin: 0; min-height: 100vh; padding: 22px;
+                display: flex; align-items: center; justify-content: center;
+                text-align: center; font-family: sans-serif;
+                color: white;
+                background: linear-gradient(160deg,#102e24,#176b45,#071b15);
+              }
+              main { width: 100%; max-width: 440px; }
+              img {
+                display: block; width: 100%; max-height: 65vh;
+                object-fit: contain; border-radius: 14px;
+                margin: 0 auto 20px;
+              }
+              h1 { font-size: 25px; margin: 12px 0; }
+              p { font-size: 16px; line-height: 1.8; }
+              button {
+                width: 100%; padding: 16px; margin-top: 12px;
+                border: 0; border-radius: 12px;
+                background: #f2d16b; color: #173b2b;
+                font-size: 20px; font-weight: bold;
+              }
+            </style>
+          </head>
+          <body>
+            <main>
+              <img src="cover.png" alt="غلاف المواطن السوداني - وجع وأمل">
+              <h1>المواطن السوداني</h1>
+              <p>وجع وأمل — تأليف عثمان جنا</p>
+              <button onclick="location.href='index.html'">ابدأ القراءة</button>
+            </main>
+          </body>
+          </html>
+          HTML
 
           cat > settings.gradle <<'GRADLE'
           pluginManagement {
@@ -89,8 +133,8 @@ jobs:
                   applicationId 'com.osmanjana.citizensudani'
                   minSdk 23
                   targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
+                  versionCode 2
+                  versionName '1.1'
               }
 
               compileOptions {
@@ -139,7 +183,7 @@ jobs:
                   webView.setWebViewClient(new WebViewClient());
                   webView.getSettings().setJavaScriptEnabled(true);
                   webView.getSettings().setDomStorageEnabled(true);
-                  webView.loadUrl("file:///android_asset/index.html");
+                  webView.loadUrl("file:///android_asset/cover.html");
               }
           }
           JAVA
